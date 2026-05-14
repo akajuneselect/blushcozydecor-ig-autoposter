@@ -42,14 +42,16 @@ def upload_to_supabase(file_path):
 
 def get_IG_caption(image_path, retries=5):
     prompt = (
-        "\u4f60\u662f\u4e00\u4e2a\u4e13\u4e1a\u7684\u65f6\u5c1a\u5546\u4e1a\u5206\u6790\u5e08\u548c\u793e\u4ea4\u5a92\u4f53\u8fd0\u8425\u4e13\u5bb6\u3002\n\n"
-        "\u4efb\u52a1\uff1a\u89c2\u5bdf\u56fe\u7247\u4e2d\u7684\u7ae5\u88c5\uff0c\u751f\u6210\u4e00\u6bb5\u5177\u5907\u9002\u5408\u4f20\u64ad\u5438\u5f15\u7c89\u4e1d\u7684 Instagram \u82f1\u6587\u6587\u6848\uff0c\u4f7f\u7528\u5408\u9002\u7684emoji\u3002\n\n"
-        "\u6587\u6848\u4e60\u60ef\u5b9a\u5236\uff1a\n"
-        "1. \u5f00\u5934\u7b2c\u4e00\u884c\uff1a\u75286SS NEW IN | \u5355\u54c1\u540d\u79f0 \u7684\u7ed3\u6784\u3002\n"
-        "2. \u4e2d\u6bb5\uff1a\u7b80\u6d01\u660e\u4e86\u7684\u63cf\u8ff0\u8863\u670d\u8bbe\u8ba1\u4eae\u70b9\u3001\u98ce\u683c\uff08\u5355\u72ec\u4e00\u884c\uff09\uff0c\u9002\u5408\u4ec0\u4e48\u641c\u914d\u548c\u573a\u666f\uff08\u5355\u72ec\u4e00\u884c\uff09\u3002\n"
-        "3. \u7ed3\u5c3e\uff1a\u5355\u72ec\u4e00\u884c\u5199\u660e \ud83d\uded9Shopee\uff1aTiny One Kids, \u518d\u81ea\u7136\u5f15\u5bfc\u5173\u6ce8\u6216\u70b9\u8d5e\u3002\n"
-        "4. \u6807\u7b7e\uff1a\u5305\u542b #TINYONE #tinyoneth #ShopeeTH \u4ee5\u53ca 3 \u4e2a\u76f8\u5173\u6807\u7b7e\u3002\n\n"
-        "DO NOT say 'Here is your caption' or 'Sure'."
+        "You are an Instagram copywriter for Tiny One Kids, a Thai children's fashion brand.\n\n"
+        "Write a SHORT English Instagram caption for the kids' outfit shown. Use real emoji (not escaped codes).\n\n"
+        "Format (exactly):\n"
+        "26SS NEW IN | [product name]\n"
+        "[1-2 punchy lines: key design detail + vibe. Max 20 words total.]\n"
+        "\n"
+        "🛍️ Shopee: Tiny One Kids\n"
+        "\n"
+        "#TINYONE #tinyoneth #ShopeeTH [3 relevant tags]\n\n"
+        "Rules: No fluff. No long sentences. No 'Here is your caption' or 'Sure'. Emoji must render correctly."
     )
     for attempt in range(retries):
         try:
