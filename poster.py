@@ -28,14 +28,16 @@ client_gemini = genai.Client(api_key=GEMINI_KEY)
 # ================= CORE FUNCTIONS =================
 
 def upload_to_supabase(file_path):
-    file_name = os.path.basename(file_path)
+    import uuid
+    ext = os.path.splitext(file_path)[1].lower() or ".jpg"
+    safe_key = uuid.uuid4().hex + ext          # e.g. a3f8c2...jpg (no Chinese chars)
     with open(file_path, "rb") as f:
         supabase.storage.from_("thai-fashion").upload(
-            path=file_name,
+            path=safe_key,
             file=f,
             file_options={"content-type": "image/jpeg", "upsert": "true"},
         )
-    return supabase.storage.from_("thai-fashion").get_public_url(file_name)
+    return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
 
 
 def get_IG_caption(image_path, retries=5):
