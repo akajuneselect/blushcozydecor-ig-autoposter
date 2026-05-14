@@ -1,11 +1,11 @@
-name: 🚀 Post to Instagram
+name: 📸 Post to Instagram
 
 on:
-  # ─── Scheduled trigger: runs every day at 10:00 AM Bangkok time (UTC+7 = 03:00 UTC) ───
+  # —— Scheduled trigger: runs every day at 10:00 AM Bangkok time (UTC+7 = 03:00 UTC) ——
   schedule:
     - cron: "0 3 * * *"
 
-  # ─── Manual trigger: run from the Actions tab at any time ───
+  # —— Manual trigger: run from the Actions tab at any time ——
   workflow_dispatch:
     inputs:
       dry_run:
@@ -13,19 +13,12 @@ on:
         required: false
         default: "false"
 
-  # ─── Auto trigger: fires when new images land in uploads/ on the main branch ───
-  push:
-    branches:
-      - main
-    paths:
-      - "uploads/**"
-
 jobs:
   post:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out the repo (includes the uploads/ folder with team images)
+      # 1. Check out the repo (includes the queue/ folder with team images)
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -61,9 +54,8 @@ jobs:
           DRY_RUN:       ${{ github.event.inputs.dry_run || 'false' }}
         run: python poster.py
 
-      # 6. Commit the moved files back so uploads/ stays clean
-      - name: Commit posted images back to repo
+      # 6. Commit any moved files (queue/ → posted/) back to the repo
+      - name: Commit moved files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: move processed images to posted/ [skip ci]"
-          file_pattern: "posted/* uploads/*"
+          commit_message: "chore: archive posted image [skip ci]"
