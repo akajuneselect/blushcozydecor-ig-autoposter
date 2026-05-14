@@ -43,15 +43,18 @@ def upload_to_supabase(file_path):
 def get_IG_caption(image_path, retries=5):
     prompt = (
         "You are an Instagram copywriter for Tiny One Kids, a Thai children's fashion brand.\n\n"
-        "Write a SHORT English Instagram caption for the kids' outfit shown. Use real emoji (not escaped codes).\n\n"
-        "Format (exactly):\n"
+        "Write a SHORT English Instagram caption for the kids' outfit shown.\n\n"
+        "Output this EXACT format, nothing else:\n"
         "26SS NEW IN | [product name]\n"
-        "[1-2 punchy lines: key design detail + vibe. Max 20 words total.]\n"
+        "[EXACTLY 1 line, max 10 words: one design highlight + one emoji]\n"
         "\n"
-        "🛍️ Shopee: Tiny One Kids\n"
+        "\U0001F6CD Shopee: Tiny One Kids\n"
         "\n"
         "#TINYONE #tinyoneth #ShopeeTH [3 relevant tags]\n\n"
-        "Rules: No fluff. No long sentences. No 'Here is your caption' or 'Sure'. Emoji must render correctly."
+        "STRICT RULES:\n"
+        "- Description: 1 line only, 10 words max, must include 1 emoji\n"
+        "- The \U0001F6CD emoji MUST appear exactly as written before Shopee\n"
+        "- No intro, no outro, no extra lines, no 'Here is' or 'Sure'"
     )
     for attempt in range(retries):
         try:
