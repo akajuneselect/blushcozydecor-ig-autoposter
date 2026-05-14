@@ -1,14 +1,14 @@
 name: 📸 Post to Instagram
 
 on:
-  # —— Scheduled trigger: runs every day at 9:00 AM Bangkok time (UTC+7 = 02:00 UTC) ——
+  # —— Scheduled trigger: 30 min early buffer (actual targets: BKK 08:30/11:30/14:30/17:30/20:30/23:30) ——
   schedule:
-    - cron: "0 2 * * *"
-    - cron: "0 5 * * *" 
-    - cron: "0 8 * * *"
-    - cron: "0 11 * * *"
-    - cron: "0 14 * * *"
-    - cron: "0 17 * * *"
+    - cron: "30 1 * * *"
+    - cron: "30 4 * * *"
+    - cron: "30 7 * * *"
+    - cron: "30 10 * * *"
+    - cron: "30 13 * * *"
+    - cron: "30 16 * * *"
     
   # —— Manual trigger: run from the Actions tab at any time ——
   workflow_dispatch:
