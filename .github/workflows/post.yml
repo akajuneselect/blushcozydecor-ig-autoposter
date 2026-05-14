@@ -1,0 +1,69 @@
+name: 🚀 Post to Instagram
+
+on:
+  # ─── Scheduled trigger: runs every day at 10:00 AM Bangkok time (UTC+7 = 03:00 UTC) ───
+  schedule:
+    - cron: "0 3 * * *"
+
+  # ─── Manual trigger: run from the Actions tab at any time ───
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (skip actual Instagram publish)"
+        required: false
+        default: "false"
+
+  # ─── Auto trigger: fires when new images land in uploads/ on the main branch ───
+  push:
+    branches:
+      - main
+    paths:
+      - "uploads/**"
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repo (includes the uploads/ folder with team images)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Cache pip dependencies for faster runs
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 4. Install dependencies
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 5. Run the poster script
+      - name: Run poster
+        env:
+          SUPABASE_URL:  ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY:  ${{ secrets.SUPABASE_KEY }}
+          GEMINI_KEY:    ${{ secrets.GEMINI_KEY }}
+          IG_USER_ID:    ${{ secrets.IG_USER_ID }}
+          INSTA_TOKEN:   ${{ secrets.INSTA_TOKEN }}
+          TG_TOKEN:      ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID:    ${{ secrets.TG_CHAT_ID }}
+          DRY_RUN:       ${{ github.event.inputs.dry_run || 'false' }}
+        run: python poster.py
+
+      # 6. Commit the moved files back so uploads/ stays clean
+      - name: Commit posted images back to repo
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: move processed images to posted/ [skip ci]"
+          file_pattern: "posted/* uploads/*"
