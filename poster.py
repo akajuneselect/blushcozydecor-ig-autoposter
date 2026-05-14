@@ -46,14 +46,16 @@ def get_IG_caption(image_path, retries=5):
         "Write a SHORT English Instagram caption for the kids' outfit shown.\n\n"
         "Output this EXACT format, nothing else:\n"
         "26SS NEW IN | [product name]\n"
+        "\n"
         "[EXACTLY 1 line, max 10 words: one design highlight + one emoji]\n"
         "\n"
-        "\U0001F6CD Shopee: Tiny One Kids\n"
+        "\U0001F6CD 𝘚𝘩𝘰𝘱𝘦𝘦: 𝘛𝘪𝘯𝘺 𝘖𝘯𝘦 𝘒𝘪𝘥𝘴\n"
         "\n"
         "#TINYONE #tinyoneth #ShopeeTH [3 relevant tags]\n\n"
         "STRICT RULES:\n"
         "- Description: 1 line only, 10 words max, must include 1 emoji\n"
         "- The \U0001F6CD emoji MUST appear exactly as written before Shopee\n"
+        "- Blank line after title and before description is required\n"
         "- No intro, no outro, no extra lines, no 'Here is' or 'Sure'"
     )
     for attempt in range(retries):
