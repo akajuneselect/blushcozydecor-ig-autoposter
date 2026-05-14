@@ -194,7 +194,7 @@ def main():
         f for f in os.listdir(FOLDER_PATH) if f.lower().endswith((".jpg", ".png"))
     )
     if not files:
-        print("uploads/ folder is empty - nothing to post")
+        print("queue/ folder is empty - nothing to post")
         return
 
     posts = defaultdict(list)
