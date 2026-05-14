@@ -17,8 +17,8 @@ INSTA_TOKEN     = os.environ["INSTA_TOKEN"]
 TG_TOKEN        = os.environ.get("TG_TOKEN", "")
 TG_CHAT_ID      = os.environ.get("TG_CHAT_ID", "")
 
-# Images uploaded by the team live in uploads/ inside the repo
-FOLDER_PATH = os.path.join(os.path.dirname(__file__), "uploads")
+# Images queued by the team live in queue/ inside the repo
+FOLDER_PATH = os.path.join(os.path.dirname(__file__), "queue")
 
 # ================= CLIENTS =================
 supabase      = create_client(SUPABASE_URL, SUPABASE_KEY)
