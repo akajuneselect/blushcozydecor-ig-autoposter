@@ -13,6 +13,9 @@ on:
         required: false
         default: "false"
 
+permissions:
+  contents: write
+
 jobs:
   post:
     runs-on: ubuntu-latest
