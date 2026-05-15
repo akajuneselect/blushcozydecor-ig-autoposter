@@ -246,7 +246,7 @@ def main():
         match = re.match(r"(.+)[_-]\d+\.(jpg|png)$", f.lower())
         prefix = match.group(1) if match else os.path.splitext(f)[0]
         posts[prefix].append(os.path.join(FOLDER_PATH, f))
-    first_key = sorted(posts.keys())[0]
+    first_key = sorted(posts.keys(), key=lambda x: int(re.search(r'\d+', x).group()))[0]
     paths = sorted(posts[first_key])
     print(f"Single image: {os.path.basename(paths[0])}" if len(paths) == 1 else f"Carousel: {first_key} ({len(paths)} images)")
     urls = [upload_to_supabase(p) for p in paths]
