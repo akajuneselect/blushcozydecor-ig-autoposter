@@ -30,34 +30,30 @@ client_gemini = genai.Client(api_key=GEMINI_KEY)
 
 
 def make_story_image(image_path):
-        """Resize image to 1080x1920 for Stories using blurred background."""
-        STORY_W, STORY_H = 1080, 1920
-        img = Image.open(image_path).convert("RGB")
-
+    """Resize image to 1080x1920 for Stories using blurred background."""
+    STORY_W, STORY_H = 1080, 1920
+    img = Image.open(image_path).convert("RGB")
     bg = img.copy()
     bg_ratio = max(STORY_W / bg.width, STORY_H / bg.height)
     bg = bg.resize(
-                (int(bg.width * bg_ratio), int(bg.height * bg_ratio)),
-                Image.LANCZOS,
+        (int(bg.width * bg_ratio), int(bg.height * bg_ratio)),
+        Image.LANCZOS,
     )
     left = (bg.width - STORY_W) // 2
     top = (bg.height - STORY_H) // 2
     bg = bg.crop((left, top, left + STORY_W, top + STORY_H))
     bg = bg.filter(ImageFilter.GaussianBlur(radius=30))
-
     PAD = 80
     max_w = STORY_W - PAD * 2
     max_h = STORY_H - PAD * 2
     fg_ratio = min(max_w / img.width, max_h / img.height)
     fg = img.resize(
-                (int(img.width * fg_ratio), int(img.height * fg_ratio)),
-                Image.LANCZOS,
+        (int(img.width * fg_ratio), int(img.height * fg_ratio)),
+        Image.LANCZOS,
     )
-
     x = (STORY_W - fg.width) // 2
     y = (STORY_H - fg.height) // 2
     bg.paste(fg, (x, y))
-
     buf = io.BytesIO()
     bg.save(buf, format="JPEG", quality=92)
     buf.seek(0)
