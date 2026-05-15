@@ -221,7 +221,8 @@ def notify_and_clean(media_id, file_names):
     print(f"Instagram publish success! Media ID: {media_id}")
     if TG_TOKEN and TG_CHAT_ID:
         try:
-            msg = f"Tiny One published!\n\nMedia ID: {media_id}\n\nFeed: posted\nStory: posted"
+            files_str = "\n".join(file_names)
+            msg = f"Tiny One published!\n\nImages:\n{files_str}\n\nMedia ID: {media_id}\n\nFeed: posted\nStory: posted"
             send_telegram(msg)
         except Exception as e:
             print(f"Telegram notification failed: {e}")
