@@ -254,7 +254,14 @@ def main():
     urls = [upload_to_supabase(p) for p in paths]
     caption = get_IG_caption(paths[0])
     SHOPEE_LINE = "\U0001f6cd Shopee: Tiny One Kids"
-    caption = caption.rstrip() + "\n\n" + SHOPEE_LINE
+    # Insert Shopee line before hashtags
+    hashtag_idx = caption.find('#')
+    if hashtag_idx != -1:
+        before_tags = caption[:hashtag_idx].rstrip()
+        tags = caption[hashtag_idx:]
+        caption = before_tags + "\n\n" + SHOPEE_LINE + "\n\n" + tags
+    else:
+        caption = caption.rstrip() + "\n\n" + SHOPEE_LINE
     media_id = post_to_insta_and_story(urls, caption, paths[0])
     if media_id:
         notify_and_clean(media_id, [os.path.basename(p) for p in paths])
