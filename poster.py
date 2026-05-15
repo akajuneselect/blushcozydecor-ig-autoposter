@@ -61,7 +61,7 @@ def upload_to_supabase(file_path):
                                     file=f,
                                     file_options={"content-type": "image/jpeg", "upsert": "true"},
                     )
-                return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
+    return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
 
 def upload_bytes_to_supabase(buf, suffix="_story.jpg"):
         import uuid
