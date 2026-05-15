@@ -65,13 +65,13 @@ def upload_to_supabase(file_path):
 
 def upload_bytes_to_supabase(buf, suffix="_story.jpg"):
         import uuid
-    safe_key = uuid.uuid4().hex + suffix
-    data = buf.read() if hasattr(buf, "read") else buf
-    supabase.storage.from_("thai-fashion").upload(
+        safe_key = uuid.uuid4().hex + suffix
+        data = buf.read() if hasattr(buf, "read") else buf
+        supabase.storage.from_("thai-fashion").upload(
                 path=safe_key,
                 file=data,
                 file_options={"content-type": "image/jpeg", "upsert": "true"},
-    )
+        )
         return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
 
 def get_IG_caption(image_path, retries=5):
