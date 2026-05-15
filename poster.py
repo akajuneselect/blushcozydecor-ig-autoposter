@@ -190,7 +190,11 @@ def post_to_insta_and_story(urls, caption, first_image_path):
                 print("Story container creation failed")
         except Exception as story_error:
             print(f"Story error: {story_error}")
-
+for name in file_names:
+            src = os.path.join(FOLDER_PATH, name)
+            if os.path.exists(src):
+                            os.remove(src)
+                            print(f"Deleted from queue/: {name}")
         return published_media_id
 
     except Exception as e:
@@ -224,15 +228,6 @@ def notify_and_clean(media_id, file_names):
             print(f"Cleaned from Supabase: {name}")
         except Exception as e:
             print(f"Delete failed for {name}: {e}")
-    posted_dir = os.path.join(FOLDER_PATH, "..", "posted")
-    os.makedirs(posted_dir, exist_ok=True)
-    for name in file_names:
-        src = os.path.join(FOLDER_PATH, name)
-        dst = os.path.join(posted_dir, name)
-        if os.path.exists(src):
-            os.rename(src, dst)
-            print(f"Moved to posted/: {name}")
-
 
 # ================= MAIN =================
 
