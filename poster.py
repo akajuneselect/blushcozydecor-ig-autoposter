@@ -18,6 +18,7 @@ IG_USER_ID = os.environ["IG_USER_ID"]
 INSTA_TOKEN = os.environ["INSTA_TOKEN"]
 TG_TOKEN = os.environ.get("TG_TOKEN", "")
 TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "")
+
 # Images queued by the team live in queue/ inside the repo
 FOLDER_PATH = os.path.join(os.path.dirname(__file__), "queue")
 
@@ -27,26 +28,24 @@ client_gemini = genai.Client(api_key=GEMINI_KEY)
 
 # ================= CORE FUNCTIONS =================
 
+
 def make_story_image(image_path):
         """Resize image to 1080x1920 for Stories using blurred background."""
         STORY_W, STORY_H = 1080, 1920
         img = Image.open(image_path).convert("RGB")
 
-    # Scale background to fill the full story frame, then blur
-        bg = img.copy()
-        bg_ratio = max(STORY_W / bg.width, STORY_H / bg.height)
-        bg = bg.resize(
-            (int(bg.width * bg_ratio), int(bg.height * bg_ratio)),
-            Image.LANCZOS,
-        )
-        # Center-crop background
-        left = (bg.width - STORY_W) // 2
-        top = (bg.height - STORY_H) // 2
-        bg = bg.crop((left, top, left + STORY_W, top + STORY_H))
-        bg = bg.filter(ImageFilter.GaussianBlur(radius=30))
+    bg = img.copy()
+    bg_ratio = max(STORY_W / bg.width, STORY_H / bg.height)
+    bg = bg.resize(
+                (int(bg.width * bg_ratio), int(bg.height * bg_ratio)),
+                Image.LANCZOS,
+    )
+    left = (bg.width - STORY_W) // 2
+    top = (bg.height - STORY_H) // 2
+    bg = bg.crop((left, top, left + STORY_W, top + STORY_H))
+    bg = bg.filter(ImageFilter.GaussianBlur(radius=30))
 
-    # Scale the original image to fit inside the story frame (with padding)
-        PAD = 80  # pixels of breathing room on each side
+    PAD = 80
     max_w = STORY_W - PAD * 2
     max_h = STORY_H - PAD * 2
     fg_ratio = min(max_w / img.width, max_h / img.height)
@@ -55,12 +54,10 @@ def make_story_image(image_path):
                 Image.LANCZOS,
     )
 
-    # Paste foreground centered on the blurred background
     x = (STORY_W - fg.width) // 2
     y = (STORY_H - fg.height) // 2
     bg.paste(fg, (x, y))
 
-    # Save to a temporary bytes buffer and return it
     buf = io.BytesIO()
     bg.save(buf, format="JPEG", quality=92)
     buf.seek(0)
@@ -70,63 +67,63 @@ def make_story_image(image_path):
 def upload_to_supabase(file_path):
         import uuid
         ext = os.path.splitext(file_path)[1].lower() or ".jpg"
-        safe_key = uuid.uuid4().hex + ext          # e.g. a3f8c2...jpg (no Chinese chars)
-    with open(file_path, "rb") as f:
-                supabase.storage.from_("thai-fashion").upload(
-                                path=safe_key,
-                                file=f,
-                                file_options={"content-type": "image/jpeg", "upsert": "true"},
-                )
-            return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
+        safe_key = uuid.uuid4().hex + ext
+        with open(file_path, "rb") as f:
+                    supabase.storage.from_("thai-fashion").upload(
+                                    path=safe_key,
+                                    file=f,
+                                    file_options={"content-type": "image/jpeg", "upsert": "true"},
+                    )
+                return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
 
 
 def upload_bytes_to_supabase(buf, suffix="_story.jpg"):
         import uuid
-        safe_key = uuid.uuid4().hex + suffix
-        supabase.storage.from_("thai-fashion").upload(
-            path=safe_key,
-            file=buf,
-            file_options={"content-type": "image/jpeg", "upsert": "true"},
-        )
-        return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
+    safe_key = uuid.uuid4().hex + suffix
+    supabase.storage.from_("thai-fashion").upload(
+                path=safe_key,
+                file=buf,
+                file_options={"content-type": "image/jpeg", "upsert": "true"},
+    )
+    return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
 
 
 def get_IG_caption(image_path, retries=5):
         prompt = (
-                    "You are an Instagram copywriter for Tiny One Kids, a Thai children's fashion brand.\n\n"
-                    "Write a SHORT English Instagram caption for the kids' outfit shown.\n\n"
-                    "Output this EXACT format, nothing else:\n"
-                    "26SS NEW IN | [product name]\n"
-                    "\n"
-                    "[EXACTLY 1 line, max 10 words: one design highlight + one emoji]\n"
-                    "\n"
-                    "\U0001F6CD \U0001d598\U0001d589\U0001d594\U0001d595\U0001d58a\U0001d58a: \U0001d4e3\U0001d4f2\U0001d4f7\U0001d4e8 \U0001d4de\U0001d4f7\U0001d4ea \U0001d4da\U0001d4f2\U0001d4ed\U0001d4fc\n"
-                    "\n"
-                    "#TINYONE #tinyoneth #ShopeeTH [3 relevant tags]\n\n"
-                    "STRICT RULES:\n"
-                    "- Description: 1 line only, 10 words max, must include 1 emoji\n"
-                    "- The \U0001F6CD emoji MUST appear exactly as written before Shopee\n"
-                    "- Blank line after title and before description is required\n"
-                    "- No intro, no outro, no extra lines, no 'Here is' or 'Sure'"
-        )
-        for attempt in range(retries):
-                    try:
-                                    with open(image_path, "rb") as f:
-                                                        img_bytes = f.read()
-                                                    response = client_gemini.models.generate_content(
-                                        model="gemini-2.5-flash",
-                                        contents=[
-                                            prompt,
-                                            types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"),
-                                        ],
-                                                    )
-                                    if response.text:
-                                                        return response.text
-                    except Exception as e:
-                                    print(f"Gemini attempt {attempt + 1} failed: {e}")
-                                    time.sleep((2 ** attempt) + random.random())
-                            print("Gemini failed after all retries - using fallback caption")
-                return "New arrival Elegant & modern design."
+            "You are an Instagram copywriter for Tiny One Kids, a Thai children's fashion brand.\n\n"
+            "Write a SHORT English Instagram caption for the kids' outfit shown.\n\n"
+            "Output this EXACT format, nothing else:\n"
+            "26SS NEW IN | [product name]\n"
+            "\n"
+            "[EXACTLY 1 line, max 10 words: one design highlight + one emoji]\n"
+            "\n"
+            "\U0001F6CD \U0001d598\U0001d589\U0001d594\U0001d595\U0001d58a\U0001d58a: \U0001d4e3\U0001d4f2\U0001d4f7\U0001d4e8 \U0001d4de\U0001d4f7\U0001d4ea \U0001d4da\U0001d4f2\U0001d4ed\U0001d4fc\n"
+            "\n"
+            "#TINYONE #tinyoneth #ShopeeTH [3 relevant tags]\n\n"
+            "STRICT RULES:\n"
+            "- Description: 1 line only, 10 words max, must include 1 emoji\n"
+            "- The \U0001F6CD emoji MUST appear exactly as written before Shopee\n"
+            "- Blank line after title and before description is required\n"
+            "- No intro, no outro, no extra lines, no 'Here is' or 'Sure'"
+)
+    for attempt in range(retries):
+                try:
+                                with open(image_path, "rb") as f:
+                                                    img_bytes = f.read()
+                                                response = client_gemini.models.generate_content(
+                                    model="gemini-2.5-flash",
+                                    contents=[
+                                        prompt,
+                                        types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"),
+                                    ],
+                                                )
+                                if response.text:
+                                                    return response.text
+                except Exception as e:
+                                print(f"Gemini attempt {attempt + 1} failed: {e}")
+                                time.sleep((2 ** attempt) + random.random())
+                        print("Gemini failed after all retries - using fallback caption")
+    return "New arrival Elegant & modern design."
 
 
 def post_to_insta_and_story(urls, caption, first_image_path):
@@ -137,9 +134,9 @@ def post_to_insta_and_story(urls, caption, first_image_path):
                                         f"https://graph.facebook.com/v21.0/{IG_USER_ID}/media",
                                         data={"image_url": urls[0], "caption": caption, "access_token": INSTA_TOKEN},
                                     ).json()
-else:
+        else:
             print("Creating carousel child containers")
-                item_ids = []
+            item_ids = []
             for url in urls:
                                 item = requests.post(
                                                         f"https://graph.facebook.com/v21.0/{IG_USER_ID}/media",
@@ -182,13 +179,11 @@ else:
         published_media_id = publish_res["id"]
         print(f"Feed published: {published_media_id}")
 
-        # ── Story (1080x1920 with blurred background) ──
         try:
                         print("Creating Story image (1080x1920)...")
             story_buf = make_story_image(first_image_path)
             story_url = upload_bytes_to_supabase(story_buf)
             print(f"Story image uploaded: {story_url}")
-
             story_container = requests.post(
                                 f"https://graph.facebook.com/v21.0/{IG_USER_ID}/media",
                                 data={"image_url": story_url, "media_type": "STORIES", "access_token": INSTA_TOKEN},
