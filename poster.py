@@ -99,12 +99,9 @@ def get_IG_caption(image_path, retries=5):
         "\n"
         "[EXACTLY 1 line, max 10 words: one design highlight + one emoji]\n"
         "\n"
-        "\U0001f6cd \U0001d618\U0001d629\U0001d626\U0001d631\U0001d626\U0001d626: \U0001d61b\U0001d624\U0001d627\U0001d62e \U0001d61e\U0001d627\U0001d626 \U0001d61a\U0001d624\U0001d633\U0001d634\n"
-        "\n"
         "#TINYONE #tinyoneth #ShopeeTH [3 relevant tags]\n\n"
         "STRICT RULES:\n"
         "- Description: 1 line only, 10 words max, must include 1 emoji\n"
-        "- The \U0001f6cd emoji MUST appear exactly as written before Shopee\n"
         "- Blank line after title and before description is required\n"
         "- No intro, no outro, no extra lines, no 'Here is' or 'Sure'"
     )
@@ -256,6 +253,8 @@ def main():
     print(f"Single image: {os.path.basename(paths[0])}" if len(paths) == 1 else f"Carousel: {first_key} ({len(paths)} images)")
     urls = [upload_to_supabase(p) for p in paths]
     caption = get_IG_caption(paths[0])
+    SHOPEE_LINE = "\U0001f6cd Shopee: Tiny One Kids"
+    caption = caption.rstrip() + "\n\n" + SHOPEE_LINE
     media_id = post_to_insta_and_story(urls, caption, paths[0])
     if media_id:
         notify_and_clean(media_id, [os.path.basename(p) for p in paths])
