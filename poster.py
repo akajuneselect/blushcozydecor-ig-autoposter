@@ -28,29 +28,6 @@ client_gemini = genai.Client(api_key=GEMINI_KEY)
 
 # ================= CORE FUNCTIONS =================
 
-def make_story_image(image_path):
-    STORY_W, STORY_H = 1080, 1920
-    img = Image.open(image_path).convert("RGB")
-    bg = img.copy()
-    bg_ratio = max(STORY_W / bg.width, STORY_H / bg.height)
-    bg = bg.resize((int(bg.width * bg_ratio), int(bg.height * bg_ratio)), Image.LANCZOS)
-    left = (bg.width - STORY_W) // 2
-    top = (bg.height - STORY_H) // 2
-    bg = bg.crop((left, top, left + STORY_W, top + STORY_H))
-    bg = bg.filter(ImageFilter.GaussianBlur(radius=30))
-    PAD = 80
-    max_w = STORY_W - PAD * 2
-    max_h = STORY_H - PAD * 2
-    fg_ratio = min(max_w / img.width, max_h / img.height)
-    fg = img.resize((int(img.width * fg_ratio), int(img.height * fg_ratio)), Image.LANCZOS)
-    x = (STORY_W - fg.width) // 2
-    y = (STORY_H - fg.height) // 2
-    bg.paste(fg, (x, y))
-    buf = io.BytesIO()
-    bg.save(buf, format="JPEG", quality=92)
-    buf.seek(0)
-    return buf
-
 def upload_to_supabase(file_path, retries=3):
     import uuid
     ext = os.path.splitext(file_path)[1].lower() or ".jpg"
@@ -69,26 +46,6 @@ def upload_to_supabase(file_path, retries=3):
             if attempt < retries - 1:
                 time.sleep(3 * (attempt + 1))
     raise Exception(f"upload_to_supabase failed after {retries} attempts: {file_path}")
-
-def upload_bytes_to_supabase(buf, suffix="_story.jpg", retries=3):
-    import uuid
-    for attempt in range(retries):
-        try:
-            safe_key = uuid.uuid4().hex + suffix
-            data = buf.read() if hasattr(buf, "read") else buf
-            supabase.storage.from_("thai-fashion").upload(
-                path=safe_key,
-                file=data,
-                file_options={"content-type": "image/jpeg", "upsert": "true"},
-            )
-            return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
-        except Exception as e:
-            print(f"Upload bytes attempt {attempt + 1} failed: {e}")
-            if attempt < retries - 1:
-                time.sleep(3 * (attempt + 1))
-                if hasattr(buf, "seek"):
-                    buf.seek(0)
-    raise Exception(f"upload_bytes_to_supabase failed after {retries} attempts")
 
 def get_IG_caption(image_path, retries=5):
     prompt = (
@@ -124,7 +81,7 @@ def get_IG_caption(image_path, retries=5):
     print("Gemini failed after all retries - using fallback caption")
     return "New arrival Elegant & modern design."
 
-def post_to_insta_and_story(urls, caption, first_image_path):
+def post_to_insta_and_story(urls, caption):
     try:
         if len(urls) == 1:
             print("Creating single-image Feed container")
@@ -177,29 +134,6 @@ def post_to_insta_and_story(urls, caption, first_image_path):
         published_media_id = publish_res["id"]
         print(f"Feed published: {published_media_id}")
 
-        try:
-            print("Creating Story image (1080x1920)...")
-            story_buf = make_story_image(first_image_path)
-            story_url = upload_bytes_to_supabase(story_buf)
-            print(f"Story image uploaded: {story_url}")
-            story_container = requests.post(
-                f"https://graph.facebook.com/v21.0/{IG_USER_ID}/media",
-                data={"image_url": story_url, "media_type": "STORIES", "access_token": INSTA_TOKEN},
-            ).json()
-            print("Story Container:", story_container)
-            if "id" in story_container:
-                time.sleep(5)
-                story_publish = requests.post(
-                    f"https://graph.facebook.com/v21.0/{IG_USER_ID}/media_publish",
-                    data={"creation_id": story_container["id"], "access_token": INSTA_TOKEN},
-                ).json()
-                print("Story Publish:", story_publish)
-                print("Story published" if "id" in story_publish else "Story publish failed")
-            else:
-                print("Story container creation failed")
-        except Exception as story_error:
-            print(f"Story error: {story_error}")
-
         return published_media_id
 
     except Exception as e:
@@ -222,7 +156,7 @@ def notify_and_clean(media_id, file_names):
     if TG_TOKEN and TG_CHAT_ID:
         try:
             files_str = "\n".join(file_names)
-            msg = f"Tiny One published!\n\nImages:\n{files_str}\n\nMedia ID: {media_id}\n\nFeed: posted\nStory: posted"
+            msg = f"Tiny One published!\n\nImages:\n{files_str}\n\nMedia ID: {media_id}\n\nFeed: posted"
             send_telegram(msg)
         except Exception as e:
             print(f"Telegram notification failed: {e}")
@@ -263,8 +197,7 @@ def main():
         caption = before_tags + "\n\n" + SHOPEE_LINE + "\n\n" + tags
     else:
         caption = caption.rstrip() + "\n\n" + SHOPEE_LINE
-    media_id = post_to_insta_and_story(urls, caption, paths[0])
-    if media_id:
+    media_id = postmedia_id = post_to_insta_and_story(urls, caption)d:
         notify_and_clean(media_id, [os.path.basename(p) for p in paths])
 
 if __name__ == "__main__":
