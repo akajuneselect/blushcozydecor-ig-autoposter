@@ -86,7 +86,7 @@ def get_IG_caption(image_path, retries=5):
         "\n"
         "[EXACTLY 1 line, max 10 words: one design highlight + one emoji]\n"
         "\n"
-        "\U0001F6CD \U0001d598\U0001d589\U0001d594\U0001d595\U0001d58a\U0001d58a: \U0001d4e3\U0001d4f2\U0001d4f7\U0001d4e8 \U0001d4de\U0001d4f7\U0001d4ea \U0001d4da\U0001d4f2\U0001d4ed\U0001d4fc\n"
+        "🛍 𝘚𝘩𝘰𝘱𝘦𝘦: 𝘛𝘪𝘯𝘺 𝘖𝘯𝘦 𝘒𝘪𝘥𝘴\n"
         "\n"
         "#TINYONE #tinyoneth #ShopeeTH [3 relevant tags]\n\n"
         "STRICT RULES:\n"
