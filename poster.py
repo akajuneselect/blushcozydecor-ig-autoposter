@@ -18,7 +18,7 @@ IG_USER_ID = os.environ["IG_USER_ID"]
 INSTA_TOKEN = os.environ["INSTA_TOKEN"]
 TG_TOKEN = os.environ.get("TG_TOKEN", "")
 TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "")
-
+h
 # Images queued by the team live in queue/ inside the repo
 FOLDER_PATH = os.path.join(os.path.dirname(__file__), "queue")
 
@@ -265,7 +265,7 @@ def main():
 
     posts = defaultdict(list)
     for f in files:
-                match = re.match(r"(.+)_\d+\.(jpg|png)$", f.lower())
+                match = re.match(r"(.+)[_-]\d+\.(jpg|png)$", f.lower())
         prefix = match.group(1) if match else os.path.splitext(f)[0]
         posts[prefix].append(os.path.join(FOLDER_PATH, f))
 
