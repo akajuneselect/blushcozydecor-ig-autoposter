@@ -51,28 +51,44 @@ def make_story_image(image_path):
     buf.seek(0)
     return buf
 
-def upload_to_supabase(file_path):
+def upload_to_supabase(file_path, retries=3):
     import uuid
     ext = os.path.splitext(file_path)[1].lower() or ".jpg"
-    safe_key = uuid.uuid4().hex + ext
-    with open(file_path, "rb") as f:
-        supabase.storage.from_("thai-fashion").upload(
-            path=safe_key,
-            file=f,
-            file_options={"content-type": "image/jpeg", "upsert": "true"},
-        )
-    return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
+    for attempt in range(retries):
+        try:
+            safe_key = uuid.uuid4().hex + ext
+            with open(file_path, "rb") as f:
+                supabase.storage.from_("thai-fashion").upload(
+                    path=safe_key,
+                    file=f,
+                    file_options={"content-type": "image/jpeg", "upsert": "true"},
+                )
+            return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
+        except Exception as e:
+            print(f"Upload attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:
+                time.sleep(3 * (attempt + 1))
+    raise Exception(f"upload_to_supabase failed after {retries} attempts: {file_path}")
 
-def upload_bytes_to_supabase(buf, suffix="_story.jpg"):
+def upload_bytes_to_supabase(buf, suffix="_story.jpg", retries=3):
     import uuid
-    safe_key = uuid.uuid4().hex + suffix
-    data = buf.read() if hasattr(buf, "read") else buf
-    supabase.storage.from_("thai-fashion").upload(
-        path=safe_key,
-        file=data,
-        file_options={"content-type": "image/jpeg", "upsert": "true"},
-    )
-    return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
+    for attempt in range(retries):
+        try:
+            safe_key = uuid.uuid4().hex + suffix
+            data = buf.read() if hasattr(buf, "read") else buf
+            supabase.storage.from_("thai-fashion").upload(
+                path=safe_key,
+                file=data,
+                file_options={"content-type": "image/jpeg", "upsert": "true"},
+            )
+            return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
+        except Exception as e:
+            print(f"Upload bytes attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:
+                time.sleep(3 * (attempt + 1))
+                if hasattr(buf, "seek"):
+                    buf.seek(0)
+    raise Exception(f"upload_bytes_to_supabase failed after {retries} attempts")
 
 def get_IG_caption(image_path, retries=5):
     prompt = (
