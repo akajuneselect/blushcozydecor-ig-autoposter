@@ -197,8 +197,8 @@ def main():
         caption = before_tags + "\n\n" + SHOPEE_LINE + "\n\n" + tags
     else:
         caption = caption.rstrip() + "\n\n" + SHOPEE_LINE
-    media_id = postmedia_id = post_to_insta_and_story(urls, caption)d:
-        notify_and_clean(media_id, [os.path.basename(p) for p in paths])
+    media_id = postmedia_id = post_to_insta_and_story(urls, caption)
+    notify_and_clean(media_id, [os.path.basename(p) for p in paths])
 
 if __name__ == "__main__":
     main()
