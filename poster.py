@@ -16,7 +16,7 @@ SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 GEMINI_KEY = os.environ["GEMINI_KEY"]
 IG_USER_ID = os.environ["IG_USER_ID"]
 INSTA_TOKEN = os.environ["INSTA_TOKEN"]
-TG_TOKEN = os.environ.get("TG_TOKEN", "")h
+TG_TOKEN = os.environ.get("TG_TOKEN", "")
 TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "")
 
 # Images queued by the team live in queue/ inside the repo
