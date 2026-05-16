@@ -16,7 +16,7 @@ SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 GEMINI_KEY = os.environ["GEMINI_KEY"]
 IG_USER_ID = os.environ["IG_USER_ID"]
 INSTA_TOKEN = os.environ["INSTA_TOKEN"]
-TG_TOKEN = os.environ.get("TG_TOKEN", "")
+TG_TOKEN = os.environ.get("TG_TOKEN", "")h
 TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "")
 
 # Images queued by the team live in queue/ inside the repo
@@ -174,13 +174,13 @@ def notify_and_clean(media_id, file_names):
 # ================= MAIN =================
 
 def main():
-    files = sorted(f for f in os.listdir(FOLDER_PATH) if f.lower().endswith((".jpg", ".png")))
+    files = sorted(f for f in os.listdir(FOLDER_PATH) if f.lower().endswith((".jpg", ".jpeg", ".png")))
     if not files:
         print("queue/ folder is empty - nothing to post")
         return
     posts = defaultdict(list)
     for f in files:
-        match = re.match(r"(.+)[_-]\d+\.(jpg|png)$", f.lower())
+        match = re.match(r"(.+)[_-]\d+\.(jpg|jpeg|png)$", f.lower())
         prefix = match.group(1) if match else os.path.splitext(f)[0]
         posts[prefix].append(os.path.join(FOLDER_PATH, f))
     first_key = sorted(posts.keys(), key=lambda x: int(re.search(r'\d+', x).group()))[0]
