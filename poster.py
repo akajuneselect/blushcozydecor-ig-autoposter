@@ -188,7 +188,7 @@ def main():
     print(f"Single image: {os.path.basename(paths[0])}" if len(paths) == 1 else f"Carousel: {first_key} ({len(paths)} images)")
     urls = [upload_to_supabase(p) for p in paths]
     caption = get_IG_caption(paths[0])
-    SHOPEE_LINE = "\U0001f6cd Shopee: Tiny One Kids"
+    SHOPEE_LINE = "\U0001f6cd 𝘚𝘩𝘰𝘱𝘦𝘦: 𝘛𝘪𝘯𝘺 𝘖𝘯𝘦 𝘒𝘪𝘥𝘴"
     # Insert Shopee line before hashtags
     hashtag_idx = caption.find('#')
     if hashtag_idx != -1:
