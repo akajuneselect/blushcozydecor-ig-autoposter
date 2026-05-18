@@ -66,4 +66,4 @@ jobs:
       - name: Commit moved files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: archive posted image [skip ci]"
+          commit_message: "chore: archive posted image"
