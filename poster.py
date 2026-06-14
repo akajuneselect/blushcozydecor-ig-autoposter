@@ -60,7 +60,7 @@ def get_IG_caption(image_path, retries=5):
         "\U0001f6cd\ufe0f Shop now on Etsy: tagifree.etsy.com\n"
         "\U0001f3a8 Want your own design? We offer full customisation \u2014 just tell us your idea.\n"
         "\U0001f4e6 Bulk orders welcome \u2014 DM us for wholesale & event pricing!\n"
-        "#tagifree #irononpatches #custompatches #patchlover #patchgame #diyfashion #customembroidery #irononpatch #etsyshop #etsyseller [2 relevant product tags]\n\n"
+        "#tagifree #irononpatches #custompatches #patchlover #patchcollector #patchgame #patchaddict #customjacket #diyfashion #customembroidery #personalisedgifts #customclothing #etsyshop #etsyseller [2 relevant product tags]\n\n"
         "STRICT RULES:\n"
         "- Description: 1 line only, 12 words max, must include 1 emoji\n"
         "- Keep the 3 action-hook lines (Shop / Custom / Bulk) and all hashtags EXACTLY as given\n"
@@ -85,7 +85,7 @@ def get_IG_caption(image_path, retries=5):
             print(f"Gemini attempt {attempt + 1} failed: {e}")
             time.sleep((2 ** attempt) + random.random())
     print("Gemini failed after all retries - using fallback caption")
-    return "\u2728 Custom iron-on patches, made just for you \U0001f9f5\n\nIron on, stand out \u2014 your style, your patch \u2728\n\n\U0001f6cd\ufe0f Shop now on Etsy: tagifree.etsy.com\n\U0001f3a8 Want your own design? Full customisation available.\n\U0001f4e6 Bulk orders welcome \u2014 DM us for wholesale & event pricing!\n#tagifree #irononpatches #custompatches #patchlover #patchgame #diyfashion #customembroidery #etsyshop"
+    return "\u2728 Custom iron-on patches, made just for you \U0001f9f5\n\nIron on, stand out \u2014 your style, your patch \u2728\n\n\U0001f6cd\ufe0f Shop now on Etsy: tagifree.etsy.com\n\U0001f3a8 Want your own design? Full customisation available.\n\U0001f4e6 Bulk orders welcome \u2014 DM us for wholesale & event pricing!\n#tagifree #irononpatches #custompatches #patchlover #patchcollector #patchgame #patchaddict #customjacket #diyfashion #customembroidery #personalisedgifts #customclothing #etsyshop #etsyseller"
 
 def post_to_insta_and_story(urls, caption):
     try:
