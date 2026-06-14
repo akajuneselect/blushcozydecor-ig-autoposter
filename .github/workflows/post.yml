@@ -1,15 +1,10 @@
-name: 📸 Post to Instagram
-
+name: Post to Instagram
 on:
-  # —— Scheduled trigger: 30 min early buffer (actual targets: BKK 08:30/11:30/14:30/17:30/20:30/23:30) ——
+  # —— Scheduled trigger: Auckland (NZST, UTC+12) — 11:00 AM & 7:00 PM NZ ——
   schedule:
-    - cron: "30 1 * * *"
-    - cron: "30 4 * * *"
-    - cron: "30 7 * * *"
-    - cron: "30 10 * * *"
-    - cron: "30 13 * * *"
-    - cron: "30 16 * * *"
-    
+    - cron: "0 23 * * *"   # 11:00 AM Auckland
+    - cron: "0 7 * * *"    # 7:00 PM Auckland
+
   # —— Manual trigger: run from the Actions tab at any time ——
   workflow_dispatch:
     inputs:
@@ -52,14 +47,14 @@ jobs:
       # 5. Run the poster script
       - name: Run poster
         env:
-          SUPABASE_URL:  ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY:  ${{ secrets.SUPABASE_KEY }}
-          GEMINI_KEY:    ${{ secrets.GEMINI_KEY }}
-          IG_USER_ID:    ${{ secrets.IG_USER_ID }}
-          INSTA_TOKEN:   ${{ secrets.INSTA_TOKEN }}
-          TG_TOKEN:      ${{ secrets.TG_TOKEN }}
-          TG_CHAT_ID:    ${{ secrets.TG_CHAT_ID }}
-          DRY_RUN:       ${{ github.event.inputs.dry_run || 'false' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: python poster.py
 
       # 6. Commit any moved files (queue/ → posted/) back to the repo
