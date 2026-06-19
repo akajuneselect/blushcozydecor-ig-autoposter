@@ -49,22 +49,22 @@ def upload_to_supabase(file_path, retries=3):
 
 def get_IG_caption(image_path, retries=5):
     prompt = (
-        "You are an Instagram copywriter for Tagifree, a brand specialising in custom iron-on patches & personalised DIY products, shipping WORLDWIDE.\n\n"
+        "You are an Instagram + Pinterest copywriter for Tagifree, a brand specialising in custom iron-on patches & personalised DIY products, shipping WORLDWIDE.\n\n"
         "Your audience: people who LOVE iron-on patches and customising their own clothes, bags, jackets, hats & gifts. Speak to that passion.\n\n"
-        "Write a SHORT, catchy English Instagram caption for the product shown in the image.\n\n"
+        "Write a SHORT, catchy English caption for the product shown in the image. It will be posted on Instagram and synced to Pinterest, so the description must read naturally and include searchable keywords (e.g. iron-on patch, custom jacket, DIY denim, embroidered patch) that people actually search for.\n\n"
         "Output this EXACT format, nothing else:\n"
         "\u2728 [catchy hook about the patch / customisation]\n"
         "\n"
-        "[EXACTLY 1 line, max 12 words: one highlight that excites patch lovers & DIY fans + 1 emoji]\n"
+        "[1-2 natural sentences, max 30 words: describe the product and how it can be used, weaving in 2-3 searchable keywords + 1 emoji]\n"
         "\n"
         "\U0001f6cd\ufe0f Shop now on Etsy: tagifree.etsy.com\n"
         "\U0001f3a8 Want your own design? We offer full customisation \u2014 just tell us your idea.\n"
         "\U0001f4e6 Bulk orders welcome \u2014 DM us for wholesale & event pricing!\n"
-        "#tagifree #irononpatches #custompatches #patchlover #patchcollector #patchgame #patchaddict #customjacket #diyfashion #customembroidery #personalisedgifts #customclothing #etsyshop #etsyseller [2 relevant product tags]\n\n"
+        "#tagifree #irononpatches #custompatches #diyfashion #personalisedgifts [1 relevant product tag]\n\n"
         "STRICT RULES:\n"
-        "- Description: 1 line only, 12 words max, must include 1 emoji\n"
-        "- Keep the 3 action-hook lines (Shop / Custom / Bulk) and all hashtags EXACTLY as given\n"
-        "- Replace [2 relevant product tags] with 2 fitting hashtags for this product\n"
+        "- Description: 1-2 sentences, 30 words max, must read naturally with searchable keywords + include 1 emoji\n"
+        "- Keep the 3 action-hook lines (Shop / Custom / Bulk) EXACTLY as given\n"
+        "- Use ONLY the 6 hashtags shown; replace [1 relevant product tag] with 1 fitting hashtag for this product\n"
         "- Blank line after title and before description is required\n"
         "- No intro, no outro, no extra lines, no 'Here is' or 'Sure'"
     )
@@ -85,7 +85,7 @@ def get_IG_caption(image_path, retries=5):
             print(f"Gemini attempt {attempt + 1} failed: {e}")
             time.sleep((2 ** attempt) + random.random())
     print("Gemini failed after all retries - using fallback caption")
-    return "\u2728 Custom iron-on patches, made just for you \U0001f9f5\n\nIron on, stand out \u2014 your style, your patch \u2728\n\n\U0001f6cd\ufe0f Shop now on Etsy: tagifree.etsy.com\n\U0001f3a8 Want your own design? Full customisation available.\n\U0001f4e6 Bulk orders welcome \u2014 DM us for wholesale & event pricing!\n#tagifree #irononpatches #custompatches #patchlover #patchcollector #patchgame #patchaddict #customjacket #diyfashion #customembroidery #personalisedgifts #customclothing #etsyshop #etsyseller"
+    return "\u2728 Custom iron-on patches, made just for you \U0001f9f5\n\nEasy DIY iron-on patches to personalise jackets, bags & denim \u2014 your style, your patch \u2728\n\n\U0001f6cd\ufe0f Shop now on Etsy: tagifree.etsy.com\n\U0001f3a8 Want your own design? Full customisation available.\n\U0001f4e6 Bulk orders welcome \u2014 DM us for wholesale & event pricing!\n#tagifree #irononpatches #custompatches #diyfashion #personalisedgifts #customjacket"
 
 def post_to_insta_and_story(urls, caption):
     try:
