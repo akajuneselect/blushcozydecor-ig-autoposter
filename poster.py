@@ -35,12 +35,12 @@ def upload_to_supabase(file_path, retries=3):
         try:
             safe_key = uuid.uuid4().hex + ext
             with open(file_path, "rb") as f:
-                supabase.storage.from_("thai-fashion").upload(
+                supabase.storage.from_("home-decor").upload(
                     path=safe_key,
                     file=f,
                     file_options={"content-type": "image/jpeg", "upsert": "true"},
                 )
-            return supabase.storage.from_("thai-fashion").get_public_url(safe_key)
+            return supabase.storage.from_("home-decor").get_public_url(safe_key)
         except Exception as e:
             print(f"Upload attempt {attempt + 1} failed: {e}")
             if attempt < retries - 1:
@@ -49,22 +49,22 @@ def upload_to_supabase(file_path, retries=3):
 
 def get_IG_caption(image_path, retries=5):
     prompt = (
-        "You are an Instagram + Pinterest copywriter for Tagifree, a brand specialising in custom iron-on patches & personalised DIY products, shipping WORLDWIDE.\n\n"
-        "Your audience: people who LOVE iron-on patches and customising their own clothes, bags, jackets, hats & gifts. Speak to that passion.\n\n"
-        "Write a SHORT, catchy English caption for the product shown in the image. It will be posted on Instagram and synced to Pinterest, so the description must read naturally and include searchable keywords (e.g. iron-on patch, custom jacket, DIY denim, embroidered patch) that people actually search for.\n\n"
+        "You are an Instagram + Pinterest copywriter for blushcozydecor, a brand specialising in cozy home & table decor and beautiful tablescapes, shipping WORLDWIDE.\n\n"
+        "Your audience: people who LOVE styling their dining tables, setting beautiful tablescapes and creating a warm, cozy home. Speak to that passion.\n\n"
+        "Write a SHORT, catchy English caption for the product shown in the image. It will be posted on Instagram and synced to Pinterest, so the description must read naturally and include searchable keywords (e.g. table decor, tablescape, home decor, dining table styling, cozy home) that people actually search for.\n\n"
         "Output this EXACT format, nothing else:\n"
-        "\u2728 [catchy hook about the patch / customisation]\n"
+        "\u2728 [catchy hook about the decor / tablescape]\n"
         "\n"
-        "[1-2 natural sentences, max 30 words: describe the product and how it can be used, weaving in 2-3 searchable keywords + 1 emoji]\n"
+        "[1-2 natural sentences, max 30 words: describe the product and how it styles a home or table, weaving in 2-3 searchable keywords + 1 emoji]\n"
         "\n"
-        "\U0001f6cd\ufe0f Shop now on Etsy: tagifree.etsy.com\n"
-        "\U0001f3a8 Want your own design? We offer full customisation \u2014 just tell us your idea.\n"
-        "\U0001f4e6 Bulk orders welcome \u2014 DM us for wholesale & event pricing!\n"
-        "#tagifree #irononpatches #custompatches #diyfashion #personalisedgifts [1 relevant product tag]\n\n"
+        "\U0001f6cd\ufe0f Shop now on Etsy: blushcozydecor.etsy.com\n"
+        "\U0001f3a8 Want a custom look? We offer full styling \u2014 just tell us your vibe.\n"
+        "\U0001f4e6 Bulk & event orders welcome \u2014 DM us for wholesale & event pricing!\n"
+        "#blushcozydecor #tabledecor #homedecor #tablescape #cozyhome [1 relevant product tag]\n\n"
         "STRICT RULES:\n"
         "- Description: 1-2 sentences, 30 words max, must read naturally with searchable keywords + include 1 emoji\n"
         "- Keep the 3 action-hook lines (Shop / Custom / Bulk) EXACTLY as given\n"
-        "- Use ONLY the 6 hashtags shown; replace [1 relevant product tag] with 1 fitting hashtag for this product\n"
+        "- Use ONLY the 5 hashtags shown; replace [1 relevant product tag] with 1 fitting hashtag for this product\n"
         "- Blank line after title and before description is required\n"
         "- No intro, no outro, no extra lines, no 'Here is' or 'Sure'"
     )
@@ -85,7 +85,7 @@ def get_IG_caption(image_path, retries=5):
             print(f"Gemini attempt {attempt + 1} failed: {e}")
             time.sleep((2 ** attempt) + random.random())
     print("Gemini failed after all retries - using fallback caption")
-    return "\u2728 Custom iron-on patches, made just for you \U0001f9f5\n\nEasy DIY iron-on patches to personalise jackets, bags & denim \u2014 your style, your patch \u2728\n\n\U0001f6cd\ufe0f Shop now on Etsy: tagifree.etsy.com\n\U0001f3a8 Want your own design? Full customisation available.\n\U0001f4e6 Bulk orders welcome \u2014 DM us for wholesale & event pricing!\n#tagifree #irononpatches #custompatches #diyfashion #personalisedgifts #customjacket"
+    return "\u2728 Cozy home & table decor, styled with love \U0001fab7\n\nBeautiful tablescape pieces to style your dining table & warm up your home \u2014 your table, your vibe \u2728\n\n\U0001f6cd\ufe0f Shop now on Etsy: blushcozydecor.etsy.com\n\U0001f3a8 Want a custom look? Full styling available.\n\U0001f4e6 Bulk & event orders welcome \u2014 DM us for wholesale & event pricing!\n#blushcozydecor #tabledecor #homedecor #tablescape #cozyhome #diningtable"
 
 def post_to_insta_and_story(urls, caption):
     try:
@@ -161,13 +161,13 @@ def notify_and_clean(media_id, file_names):
     if TG_TOKEN and TG_CHAT_ID:
         try:
             files_str = "\n".join(file_names)
-            msg = f"Tagifree published!\n\nImages:\n{files_str}\n\nMedia ID: {media_id}\n\nFeed: posted"
+            msg = f"blushcozydecor published!\n\nImages:\n{files_str}\n\nMedia ID: {media_id}\n\nFeed: posted"
             send_telegram(msg)
         except Exception as e:
             print(f"Telegram notification failed: {e}")
     for name in file_names:
         try:
-            supabase.storage.from_("thai-fashion").remove([name])
+            supabase.storage.from_("home-decor").remove([name])
             print(f"Cleaned from Supabase: {name}")
         except Exception as e:
             print(f"Supabase delete failed for {name}: {e}")
