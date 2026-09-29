@@ -98,19 +98,16 @@ def upload_to_supabase(file_path, retries=3):
 def get_ig_caption(image_path, retries=5):
     assert client_gemini is not None, "Gemini client is not initialized"
     prompt = (
-        "You are an Instagram + Pinterest copywriter for blushcozydecor, a brand "
-        "specialising in cozy home & table decor and beautiful tablescapes, shipping "
+        "You are an Instagram + Pinterest copywriter for Blush Pages, a brand "
+        "specialising in Coquette Stationery for Journals & Planners✍🏻📓 Washi tapes, planner goodies & cozy finds, shipping "
         "WORLDWIDE.\n\n"
-        "Your audience loves styling dining tables, creating tablescapes, and making a "
         "warm, cozy home.\n\n"
         "Write a short English caption for the product in the image. Output exactly:\n"
         "✨ [catchy hook]\n\n"
         "[1-2 natural sentences, maximum 30 words, with 2-3 searchable keywords and "
         "one emoji]\n\n"
-        "🛍️ Shop now on Etsy: blushcozydecor.etsy.com\n"
-        "🎨 Want a custom look? We offer full styling — just tell us your vibe.\n"
-        "📦 Bulk & event orders welcome — DM us for wholesale & event pricing!\n"
-        "#blushcozydecor #tabledecor #homedecor #tablescape #cozyhome "
+        "🛍️ Shop now on Amazon & Etsy: blushpagesnz \n"
+        "#blushpages #JournalWithMe #JunkJournalSupplies #CoquetteStationery #JournalingCommunity"
         "[1 relevant product tag]\n\n"
         "Do not add an introduction, outro, or extra lines."
     )
