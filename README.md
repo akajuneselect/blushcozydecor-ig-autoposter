@@ -1,126 +1,84 @@
 # 🕯️ blushcozydecor IG Auto-Poster
 
-GitHub Actions + Supabase Storage + Gemini AI — fully automated Instagram posting pipeline for **blushcozydecor** (cozy home & table decor).
+GitHub Actions + Supabase Storage + Gemini AI pipeline for scheduled Instagram feed posts.
 
-## 📐 Architecture (3 Physical Stages)
+## How it works
 
-```
-┌─────────────────────────────────────────────────────────┐
-│ Stage 1 · TRIGGER                                        │
-│ GitHub Actions fires on:                                │
-│   • push to queue/ (team drops images)                  │
-│   • schedule: 11 AM & 7 PM Auckland time daily          │
-│   • workflow_dispatch (manual run from Actions tab)     │
-└─────────────────┬───────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────┐
-│ Stage 2 · STORAGE RELAY (Supabase)                      │
-│ poster.py uploads images from queue/ to                 │
-│ Supabase bucket "home-decor" → gets public CDN URL      │
-│ Instagram API requires a public HTTPS URL               │
-└─────────────────┬───────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────┐
-│ Stage 3 · DATA LOOP CLOSURE                             │
-│   • Instagram Feed published (single or carousel)       │
-│   • Supabase file deleted (cleanup)                     │
-│   • Image removed from queue/                           │
-│   • Telegram notification sent                          │
-│   • Git commit records processed files back to repo     │
-└─────────────────────────────────────────────────────────┘
-```
+1. Add `.jpg`, `.jpeg`, or `.png` images to `queue/`.
+2. GitHub Actions runs daily at 11:00 AM and 7:00 PM in `Pacific/Auckland` time.
+3. The script selects the first filename group, uploads it temporarily to Supabase, creates a Gemini caption, and publishes it to Instagram.
+4. Only after Instagram confirms success, the temporary Supabase objects and local queue files are removed. GitHub Actions commits the queue deletion.
 
-## 🔑 Required GitHub Secrets
+Uploading a file does **not** publish immediately. It waits for the next scheduled run unless you manually run the workflow.
+
+## Required GitHub Actions secrets
 
 Go to **Settings → Secrets and variables → Actions → New repository secret** and add:
 
-| Secret name | Where to get it |
-|---|---|
-| SUPABASE_URL | Supabase → Project Settings → API → Project URL |
-| SUPABASE_KEY | Supabase → Project Settings → API → service_role key |
-| GEMINI_KEY | Google AI Studio → Get API key |
-| IG_USER_ID | Instagram Graph API → your IG Business Account ID |
-| INSTA_TOKEN | Meta for Developers → long-lived access token |
-| TG_TOKEN (optional) | BotFather → bot token |
-| TG_CHAT_ID (optional) | your Telegram chat/group ID |
+| Secret | Source |
+| --- | --- |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_KEY` | Supabase service-role key |
+| `GEMINI_KEY` | Google AI Studio API key |
+| `IG_USER_ID` | Instagram professional account ID |
+| `INSTA_TOKEN` | Current Instagram/Meta access token with publishing permission |
+| `TG_TOKEN` | Optional Telegram bot token |
+| `TG_CHAT_ID` | Optional Telegram chat or group ID |
 
-## 👥 Team Workflow: How to Upload & Post
+Supabase must contain a **public** Storage bucket named `home-decor`.
 
-### Option A — Upload via GitHub UI (no Git needed)
+Optional repository variable:
 
-1. Go to the repo → **queue/** folder
-2. Click **Add file → Upload files**
-3. Drag & drop your **.jpg** or **.png** images
-4. Scroll down → click **Commit changes** (commit to main)
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `GRAPH_API_VERSION` | `v21.0` | Allows the Meta Graph API version to be updated without editing code |
 
-✅ The push to queue/ automatically triggers the Action!
+Do not commit API keys or tokens to the repository.
 
-### Option B — Upload via Git
+## Naming images
 
-```bash
-git clone git@github.com:akajuneselect/blushcozydecor-ig-autoposter.git
-cd blushcozydecor-ig-autoposter
+Images are processed in natural filename order. One run publishes one filename group.
 
-# Copy your images into queue/
-cp ~/Desktop/table_setting.jpg queue/
+| Example | Result |
+| --- | --- |
+| `candle.jpg` | Single-image post |
+| `candle_1.jpg`, `candle_2.jpg`, `candle_3.png` | One three-image carousel |
+| `01_candle.jpg`, `02_vase.jpg` | Two separate posts, processed over two runs |
 
-git add queue/
-git commit -m "add: table_setting for today's post"
-git push origin main
-# → GitHub Actions fires automatically
-```
+## Safe manual test
 
-## 📁 Naming Convention
+1. Upload a test image to `queue/`.
+2. Open **Actions → Post to Instagram → Run workflow**.
+3. Leave **dry_run** enabled for the first test.
 
-| Pattern | Result |
-|---|---|
-| candle.jpg | Single image post |
-| candle_1.jpg, candle_2.jpg, candle_3.jpg | Carousel (3-slide) |
+Dry-run mode does not call Supabase, Gemini, Instagram, or Telegram, and does not delete queue files. A real manual post requires turning dry-run off.
 
-Images are processed in alphabetical order. The first prefix group in the folder is posted each run.
+## Failure behavior
 
-## ⏰ Schedule
+- Missing secrets produce one clear error listing the missing names.
+- Instagram failure preserves the local queue files.
+- Temporary Supabase objects are cleaned up after success and after failed publishing attempts.
+- Telegram is optional and cannot make a successful Instagram post fail.
 
-The bot runs automatically at **11:00 AM & 7:00 PM Auckland time (UTC+12/+13)** every day.
+## Schedule
 
-To change the times, edit the cron lines in `.github/workflows/post.yml`:
+The workflow uses timezone-aware schedules, so New Zealand daylight-saving changes are handled automatically:
 
 ```yaml
-- cron: "0 23 * * *"   # 11:00 AM Auckland
-- cron: "0 7 * * *"    # 7:00 PM Auckland
+schedule:
+  - cron: "0 11 * * *"
+    timezone: "Pacific/Auckland"
+  - cron: "0 19 * * *"
+    timezone: "Pacific/Auckland"
 ```
 
-## 🕹️ Manual Run
+## Repository structure
 
-Go to **Actions → Post to Instagram → Run workflow** to trigger immediately. You can set `dry_run: true` to test without actually publishing.
-
-## 📊 What Happens After Posting
-
-| Item | Action |
-|---|---|
-| Image in Supabase | Deleted (cleanup) |
-| Image in queue/ | Removed |
-| Instagram Feed | Published ✅ |
-| Telegram | Notification sent ✅ |
-
-## 🗂️ File Structure
-
-```
+```text
 blushcozydecor-ig-autoposter/
-├── .github/
-│   └── workflows/
-│       └── post.yml        ← GitHub Actions workflow
-├── queue/                  ← ⬅️ Team drops images HERE
-│   └── .gitkeep
-├── uploads/                ← (legacy) alternate upload folder
-│   └── .gitkeep
-├── poster.py               ← Main Python script
-├── requirements.txt        ← Python dependencies
-└── README.md               ← This file
+├── .github/workflows/post.yml
+├── queue/
+├── poster.py
+├── requirements.txt
+└── README.md
 ```
-
----
-
-**blushcozydecor** — Instagram auto-posting bot: GitHub Actions + Supabase storage + Gemini AI captions
