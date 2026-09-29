@@ -1,50 +1,46 @@
 name: Post to Instagram
-on:
-  # —— Scheduled trigger: Auckland (NZST, UTC+12) — 11:00 AM & 7:00 PM NZ ——
-  schedule:
-    - cron: "0 23 * * *"   # 11:00 AM Auckland
-    - cron: "0 7 * * *"    # 7:00 PM Auckland
 
-  # —— Manual trigger: run from the Actions tab at any time ——
+on:
+  schedule:
+    - cron: "0 11 * * *"
+      timezone: "Pacific/Auckland"
+    - cron: "0 19 * * *"
+      timezone: "Pacific/Auckland"
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Dry run (skip actual Instagram publish)"
-        required: false
-        default: "false"
+        description: "Dry run (no external API calls and no file deletion)"
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: write
 
+concurrency:
+  group: instagram-autoposter
+  cancel-in-progress: false
+
 jobs:
   post:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
 
     steps:
-      # 1. Check out the repo (includes the queue/ folder with team images)
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      # 2. Set up Python
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
+          cache: pip
 
-      # 3. Cache pip dependencies for faster runs
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      # 4. Install dependencies
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # 5. Run the poster script
       - name: Run poster
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -54,11 +50,11 @@ jobs:
           INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          GRAPH_API_VERSION: ${{ vars.GRAPH_API_VERSION || 'v21.0' }}
         run: python poster.py
 
-      # 6. Commit any moved files (queue/ → posted/) back to the repo
-      - name: Commit moved files
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Commit posted queue changes
+        if: success() && env.DRY_RUN != 'true'
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "chore: archive posted image"
+          commit_message: "chore: remove successfully posted images"
