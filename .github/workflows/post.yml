@@ -47,7 +47,7 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
-          INSTA_TOKEN: ${{ secrets.INSTA_TOKEN }}
+          INSTA_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
           GRAPH_API_VERSION: ${{ vars.GRAPH_API_VERSION || 'v21.0' }}
